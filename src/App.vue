@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import EmojiPicker from "vue3-emoji-picker";
 import "vue3-emoji-picker/css";
 
@@ -22,7 +22,6 @@ const fruits = ref([
 const disabledEmojisGroups = [
   "smileys_people",
   "animals_nature",
-
   "activities",
   "travel_places",
   "objects",
@@ -113,6 +112,16 @@ const handleDelete = () => {
   closeModal();
 };
 
+const filteredFruits = computed(() => {
+  if (stockLimit.value === "lower") {
+    return fruits.value.filter((fruit) => fruit.stock < 10);
+  } else if (stockLimit.value === "larger") {
+    return fruits.value.filter((fruit) => fruit.stock >= 10);
+  } else {
+    return fruits.value;
+  }
+});
+
 const openDeleteModal = (fruit) => {
   if (fruit.name !== undefined) {
     newFruit.value = fruit;
@@ -171,25 +180,9 @@ const closeModal = () => {
         <th>Actions</th>
       </tr>
 
-      <template v-for="(fruit, i) in fruits" v-bind:key="i">
-        <tr v-if="stockLimit === 'larger' && fruit.stock > 10">
-          <td v-for="(fruit, index) in fruits[i]" v-bind:key="index">
-            {{ fruit }}
-          </td>
-          <td>
-            <button>edit</button>
-          </td>
-        </tr>
-        <tr v-else-if="stockLimit === 'lower' && fruit.stock < 10">
-          <td v-for="(fruit, index) in fruits[i]" v-bind:key="index">
-            {{ fruit }}
-          </td>
-          <td>
-            <button>edit</button>
-          </td>
-        </tr>
-        <tr v-else-if="stockLimit === 'all'">
-          <td v-for="(cell, index) in fruits[i]" v-bind:key="index">
+      <template v-for="(fruit, i) in filteredFruits" v-bind:key="i">
+        <tr>
+          <td v-for="(cell, index) in fruit" :key="index">
             {{ cell }}
           </td>
           <td>
